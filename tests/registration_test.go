@@ -25,46 +25,30 @@ var _ = Describe("Registration", func() {
 		page = pages.NewAutomationPracticePage(driver)
 	})
 
-	//var _ = AfterSuite(func() {
-	//	err := page.Close()
-	//	if err != nil {
-	//		log.Fatal("Unable to close the Page...=>" + err.Error())
-	//	}
-	//	if driver != nil {
-	//		if err := driver.Stop(); err != nil {
-	//			log.Fatal("Failed to stop driver..=>" + err.Error())
-	//		}
-	//	}
-	//})
+	var _ = AfterSuite(func() {
+		err := page.Close()
+		if err != nil {
+			log.Fatal("Unable to close the Page...=>" + err.Error())
+		}
+		if driver != nil {
+			if err := driver.Stop(); err != nil {
+				log.Fatal("Failed to stop driver..=>" + err.Error())
+			}
+		}
+	})
 
 	BeforeEach(func() {
 		err := page.Open(baseURL)
 		if err != nil {
 			log.Fatal("Unable to open the Page...=>" + err.Error())
 		}
+		_ = page.ClickSignIn()
 	})
 
-	Context("With any email address on the authentication page", func() {
+	Context("With any email address on the Authentication page", func() {
 		JustBeforeEach(func() {
-			When("User Sign in from Home page", func() {
-				_ = page.ClickSignIn()
-			})
-		})
-
-		It("Should redirect user to the secure authentication page", func() {
-			Expect(page.Title()).Should(Equal("Login - My Store"))
-		})
-
-		When("User enters a valid email address in the registration form", func() {
-			JustBeforeEach(func() {
-				_ = page.EnterEmailAddressRegistration(utils.GenerateRandomString(10) + "@xyz.com")
-				_ = page.ClickSubmitRegistration()
-			})
-			It("Should redirect user to the registration page", func() {
-				Eventually(func() bool {
-					return page.IsAccountCreationFormDisplayed()
-				}, 5*time.Second, 10*time.Millisecond).Should(BeTrue())
-			})
+			_ = page.EnterEmailAddressRegistration(utils.GenerateRandomString(10) + "@xyz.com")
+			_ = page.ClickSubmitRegistration()
 		})
 
 		When("User enters a blank email address in the registration form", func() {
@@ -94,19 +78,32 @@ var _ = Describe("Registration", func() {
 		})
 	})
 
-	FContext("With a valid email address and user profile creation", func() {
+	Context("With a valid email address on the Authentication page", func() {
 		emailAddr := utils.GenerateRandomString(10) + "@xyz.com"
 		JustBeforeEach(func() {
-			When("User Sign in from Home page", func() {
-				_ = page.ClickSignIn()
-			})
 			When("User enters a valid email address in the registration form", func() {
 				_ = page.EnterEmailAddressRegistration(emailAddr)
 				_ = page.ClickSubmitRegistration()
 			})
 		})
 
-		When("User enters valid Registration details", func() {
+		When("User clicks register button without submitting mandatory details", func() {
+			It("Should error and advice user appropriately", func() {
+				Eventually(func() bool {
+					return page.IsAccountCreationFormDisplayed()
+				}, 5*time.Second, 10*time.Millisecond).Should(BeTrue())
+				err := page.ClickRegister()
+				Expect(err).To(BeNil())
+				Expect(page.IsCreateAccountErrorDisplayed("lastname is required")).To(BeTrue())
+				Expect(page.IsCreateAccountErrorDisplayed("firstname is required")).To(BeTrue())
+				Expect(page.IsCreateAccountErrorDisplayed("passwd is required")).To(BeTrue())
+				Expect(page.IsCreateAccountErrorDisplayed("address1 is required")).To(BeTrue())
+				Expect(page.IsCreateAccountErrorDisplayed("city is required")).To(BeTrue())
+				Expect(page.IsCreateAccountErrorDisplayed("country requires you to choose a State")).To(BeTrue())
+			})
+		})
+
+		When("User enters valid Registration details and submits", func() {
 			It("Should be accepted and registered successfully", func() {
 				Eventually(func() bool {
 					return page.IsAccountCreationFormDisplayed()
@@ -138,7 +135,7 @@ var _ = Describe("Registration", func() {
 				Expect(err).To(BeNil())
 				Eventually(func() string {
 					return page.GetPageTitle()
-				},5*time.Second, 10*time.Millisecond).Should(Equal("My account - My Store"))
+				}, 5*time.Second, 10*time.Millisecond).Should(Equal("My account - My Store"))
 			})
 		})
 	})
