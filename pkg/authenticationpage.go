@@ -1,12 +1,10 @@
 package pkg
 
 var (
-	emailAddress                    = "email_create"
-	submitRegistration              = "SubmitCreate"
-	createAccountError              = "create_account_error"
-	createAccountForm               = "account-creation_form"
-	createAccountInvalidEmailError  = "Invalid email address"
-	createAccountAlreadyExistsError = " "
+	emailAddress       = "email_create"
+	submitRegistration = "SubmitCreate"
+	createAccountError = "create_account_error"
+	createAccountForm  = "account-creation_form"
 )
 
 func (a *AutomationPractice) EnterEmailAddressRegistration(email string) error {
