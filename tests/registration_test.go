@@ -3,7 +3,6 @@ package tests
 import (
 	pages "automation-practice-webtests/pkg"
 	utils "automation-practice-webtests/utils"
-	"fmt"
 	"log"
 	"time"
 
@@ -26,17 +25,17 @@ var _ = Describe("Registration", func() {
 		page = pages.NewAutomationPracticePage(driver)
 	})
 
-	// var _ = AfterSuite(func() {
-	// 	err := page.Close()
-	// 	if err != nil {
-	// 		log.Fatal("Unable to close the Page...=>" + err.Error())
-	// 	}
-	// 	if driver != nil {
-	// 		if err := driver.Stop(); err != nil {
-	// 			log.Fatal("Failed to stop driver..=>" + err.Error())
-	// 		}
-	// 	}
-	// })
+	//var _ = AfterSuite(func() {
+	//	err := page.Close()
+	//	if err != nil {
+	//		log.Fatal("Unable to close the Page...=>" + err.Error())
+	//	}
+	//	if driver != nil {
+	//		if err := driver.Stop(); err != nil {
+	//			log.Fatal("Failed to stop driver..=>" + err.Error())
+	//		}
+	//	}
+	//})
 
 	BeforeEach(func() {
 		err := page.Open(baseURL)
@@ -48,20 +47,18 @@ var _ = Describe("Registration", func() {
 	Context("With any email address on the authentication page", func() {
 		JustBeforeEach(func() {
 			When("User Sign in from Home page", func() {
-				page.ClickSignIn()
+				_ = page.ClickSignIn()
 			})
 		})
 
 		It("Should redirect user to the secure authentication page", func() {
-			p, _ := page.Title()
-			fmt.Println("Page title here is:" + p)
 			Expect(page.Title()).Should(Equal("Login - My Store"))
 		})
 
 		When("User enters a valid email address in the registration form", func() {
 			JustBeforeEach(func() {
-				page.EnterEmailAddressRegistration(utils.GenerateRandomString() + "@xyz.com")
-				page.ClickSubmitRegistration()
+				_ = page.EnterEmailAddressRegistration(utils.GenerateRandomString(10) + "@xyz.com")
+				_ = page.ClickSubmitRegistration()
 			})
 			It("Should redirect user to the registration page", func() {
 				Eventually(func() bool {
@@ -72,8 +69,8 @@ var _ = Describe("Registration", func() {
 
 		When("User enters a blank email address in the registration form", func() {
 			JustBeforeEach(func() {
-				page.EnterEmailAddressRegistration("")
-				page.ClickSubmitRegistration()
+				_ = page.EnterEmailAddressRegistration("")
+				_ = page.ClickSubmitRegistration()
 			})
 			It("Should error as invalid email address", func() {
 				Eventually(func() bool {
@@ -85,8 +82,8 @@ var _ = Describe("Registration", func() {
 
 		When("User enters an email that is already registered in the registration form", func() {
 			JustBeforeEach(func() {
-				page.EnterEmailAddressRegistration("xyz@gmail.com")
-				page.ClickSubmitRegistration()
+				_ = page.EnterEmailAddressRegistration("xyz@gmail.com")
+				_ = page.ClickSubmitRegistration()
 			})
 			It("Should error as previously registered", func() {
 				Eventually(func() bool {
@@ -98,18 +95,19 @@ var _ = Describe("Registration", func() {
 	})
 
 	FContext("With a valid email address and user profile creation", func() {
+		emailAddr := utils.GenerateRandomString(10) + "@xyz.com"
 		JustBeforeEach(func() {
 			When("User Sign in from Home page", func() {
-				page.ClickSignIn()
+				_ = page.ClickSignIn()
 			})
 			When("User enters a valid email address in the registration form", func() {
-				page.EnterEmailAddressRegistration(utils.GenerateRandomString() + "@xyz.com")
-				page.ClickSubmitRegistration()
+				_ = page.EnterEmailAddressRegistration(emailAddr)
+				_ = page.ClickSubmitRegistration()
 			})
 		})
 
-		When("User enters valid Titular  details", func() {
-			It("Should be accepted", func() {
+		When("User enters valid Registration details", func() {
+			It("Should be accepted and registered successfully", func() {
 				Eventually(func() bool {
 					return page.IsAccountCreationFormDisplayed()
 				}, 5*time.Second, 10*time.Millisecond).Should(BeTrue())
@@ -118,15 +116,30 @@ var _ = Describe("Registration", func() {
 					User: pages.Title{
 						Fname: "Rajaraman",
 						Lname: "Mahalingam",
-						Pwd:   utils.GenerateRandomString(),
+						Pwd:   utils.GenerateRandomString(10),
 						Date:  15,
 						Month: "October",
 						Year:  1981,
 					},
+					Addr: pages.Address{
+						Company:     utils.GenerateRandomString(10) + " Company",
+						Addrs:       "123, ABC street",
+						City:        "SAN JOSE",
+						State:       "California",
+						PostCode:    utils.GenerateRandomNumber(5),
+						HomePhone:   utils.GenerateRandomNumber(10),
+						MobilePhone: utils.GenerateRandomNumber(10),
+						Alias:       "Home",
+					},
 				}
-				page.InputUserRegistrationDetails(registration)
+				err := page.InputUserRegistrationDetails(registration)
+				Expect(err).To(BeNil())
+				err = page.ClickRegister()
+				Expect(err).To(BeNil())
+				Eventually(func() string {
+					return page.GetPageTitle()
+				},5*time.Second, 10*time.Millisecond).Should(Equal("My account - My Store"))
 			})
 		})
-
 	})
 })
