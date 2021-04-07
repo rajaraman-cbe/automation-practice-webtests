@@ -87,7 +87,7 @@ var _ = Describe("Registration", func() {
 			})
 		})
 
-		When("User clicks register button without submitting mandatory details", func() {
+		When("User clicks register button without submitting few mandatory details", func() {
 			It("Should error and advice user appropriately", func() {
 				Eventually(func() bool {
 					return page.IsAccountCreationFormDisplayed()
