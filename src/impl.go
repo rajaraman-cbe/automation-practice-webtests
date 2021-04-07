@@ -33,8 +33,8 @@ func (a *AutomationPractice) Open(url string) error {
 }
 
 //Close closes the current window
-func (a *AutomationPractice) Close() error {
-	err := a.CloseWindow()
+func (a *AutomationPractice) Clear() error {
+	err := a.Reset()
 	if check := a.CheckError(err); check != nil {
 		return check
 	}
