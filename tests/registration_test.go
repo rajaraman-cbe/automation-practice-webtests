@@ -1,7 +1,7 @@
 package tests
 
 import (
-	pages "automation-practice-webtests/pkg"
+	pages "automation-practice-webtests/src"
 	utils "automation-practice-webtests/utils"
 	"log"
 	"time"
@@ -16,6 +16,7 @@ var baseURL = "http://automationpractice.com/index.php"
 var _ = Describe("Registration", func() {
 	var driver *agouti.WebDriver
 	var page *pages.AutomationPractice
+	var emailAddress, passwd string
 
 	var _ = BeforeSuite(func() {
 		driver = agouti.ChromeDriver()
@@ -26,10 +27,6 @@ var _ = Describe("Registration", func() {
 	})
 
 	var _ = AfterSuite(func() {
-		err := page.Close()
-		if err != nil {
-			log.Fatal("Unable to close the Page...=>" + err.Error())
-		}
 		if driver != nil {
 			if err := driver.Stop(); err != nil {
 				log.Fatal("Failed to stop driver..=>" + err.Error())
@@ -43,6 +40,13 @@ var _ = Describe("Registration", func() {
 			log.Fatal("Unable to open the Page...=>" + err.Error())
 		}
 		_ = page.ClickSignIn()
+	})
+
+	AfterEach(func() {
+		err := page.ClearCookies()
+		if err != nil {
+			log.Fatal("Unable to close the Page...=>" + err.Error())
+		}
 	})
 
 	Context("With any email address on the Authentication page", func() {
@@ -79,10 +83,10 @@ var _ = Describe("Registration", func() {
 	})
 
 	Context("With a valid email address on the Authentication page", func() {
-		emailAddr := utils.GenerateRandomString(10) + "@xyz.com"
+		emailAddress = utils.GenerateRandomString(10) + "@xyz.com"
 		JustBeforeEach(func() {
 			When("User enters a valid email address in the registration form", func() {
-				_ = page.EnterEmailAddressRegistration(emailAddr)
+				_ = page.EnterEmailAddressRegistration(emailAddress)
 				_ = page.ClickSubmitRegistration()
 			})
 		})
@@ -129,6 +133,7 @@ var _ = Describe("Registration", func() {
 						Alias:       "Home",
 					},
 				}
+				passwd = registration.User.Pwd
 				err := page.InputUserRegistrationDetails(registration)
 				Expect(err).To(BeNil())
 				err = page.ClickRegister()
@@ -137,6 +142,17 @@ var _ = Describe("Registration", func() {
 					return page.GetPageTitle()
 				}, 5*time.Second, 10*time.Millisecond).Should(Equal("My account - My Store"))
 			})
+		})
+	})
+
+	Context("With the registered Email address and the Password in the Login form", func() {
+		JustBeforeEach(func() {
+			_= page.EnterLoginCredentials(emailAddress,passwd)
+		})
+		It("Should login successfully", func() {
+			Eventually(func() string {
+				return page.GetPageTitle()
+			}, 5*time.Second, 10*time.Millisecond).Should(Equal("My account - My Store"))
 		})
 	})
 })
