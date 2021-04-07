@@ -132,7 +132,10 @@ func (a *AutomationPractice) ClickRegister() error {
 	return nil
 }
 //IsCreateAccountErrorDisplayed verifies if the account error is displayed based on the error msg specified in the test
-func (a *AutomationPractice) IsCreateAccountErrorDisplayed(errorMsg string) (bool) {
-	displayed,_ := a.FindByXPath(errorAlert + "'" + errorMsg + "')]").Visible()
-	return displayed
+func (a *AutomationPractice) IsCreateAccountErrorDisplayed(errorMsg string) (bool,error) {
+	displayed,err := a.FindByXPath(errorAlert + "'" + errorMsg + "')]").Visible()
+	if check := a.CheckError(err); check != nil {
+		return false,check
+	}
+	return displayed,nil
 }
