@@ -10,10 +10,13 @@ UI automation tests using Go - Agouti, Ginkgo, Gomega
  - If not already installed, install Go for the specifc OS from here https://golang.org/dl/
  - If not already installed, install ChromeDriver for the specific OS & version of chrome from https://chromedriver.chromium.org/ - For the purpose of this test
    used chromedriver v89.xx 
-      - Mac - brew install chromedriver 
-      - Win - download the driver and add them to the %PATH% under the System Environment Variables
+      - Mac > brew install chromedriver 
+      - Win > download the driver and add it to the %PATH% under the System Environment Variables
 - git clone this project to a repository
-- If running from a terminal, go to the location of the repo and type 'go mod download' (this will downlad all of the dependencies this repo uses)
+- If running from a terminal, go to the location of the repo and type the below three 
+- go get github.com/onsi/ginkgo/ginkgo
+- go get github.com/onsi/gomega/...
+- go get github.com/sclevine/agouti
 - cd tests and type 'ginkgo'
 
 # Scenarios covered:
