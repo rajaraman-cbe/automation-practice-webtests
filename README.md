@@ -2,9 +2,9 @@
 
 UI automation tests using Go - Agouti, Ginkgo, Gomega
 
-Language - Go (1.16)
-Frameworks - Agouti, Ginkgo, Gomega
-Website - automationpractice.com
+- Language - Go (1.16)
+- Frameworks - Agouti, Ginkgo, Gomega
+- Website - automationpractice.com
 
 # Setup & pre-requisites to run on local machine:
  - If not already installed, install Go for the specifc OS from here https://golang.org/dl/
